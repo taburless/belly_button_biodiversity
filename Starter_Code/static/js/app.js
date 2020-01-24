@@ -30,14 +30,15 @@ function init() {
 }
 
 function buildMetadata(sample) {
-  d3.json("/metadata/"+sample).then((data) => {
-    console.log(data);
+  d3.json("data/samples.json").then((data) => {
+    var metadata = data.metadata
+    console.log(metadata);
 
-    var metadata = d3.select("#sample-metadata");
-    metadata.html("");
+    var clear_metadata = d3.select("#sample-metadata");
+    clear_metadata.html("");
 
-    Object.entries(data).forEach(([key,value]) => {
-      var row = metadata.append("p");
+    Object.entries(metadata).forEach(([key,value]) => {
+      var row = clear_metadata.append("p");
       row.text(`${key}: ${value}`);
     })
 
@@ -47,14 +48,22 @@ function buildMetadata(sample) {
 function buildCharts(sample) {
     var url = d3.json("data/samples.json");
 
-    url.then((sampleData) => {
+    url.then((data) => {
+      var sampleData = data.samples;
       console.log(sampleData);
 
+      var arr = sampleData.filter(object => object.id == sample);
+      var result = arr[0];
+
       var trace1 = {
-        x: sampleData.otu_ids,
-        y: sampleData.sample_values,
-        text: sampleData.otu_labels,
-        mode: 'markers'
+        x: result.otu_ids,
+        y: result.sample_values,
+        text: result.otu_labels,
+        mode: 'markers',
+        marker: {
+          size: result.sample_values,
+          color: result.otu_ids
+        }
       };
 
       var bubbleData = [trace1];
@@ -65,18 +74,20 @@ function buildCharts(sample) {
       Plotly.newPlot("bubble", bubbleData, bubbleLayout);
 
       var trace2 = {
-        values: sampleData.sample_values.slice(0,10),
-        labels: sampleData.otu_ids.slice(0,10),
-        type: "pie",
-        textinfo: 'percent'
+        y: result.otu_ids.slice(0,10).reverse(),
+        labels: result.sample_values.slice(0,10).reverse(),
+        text: result.otu_labels.slice(0,10).reverse(),
+        type: "bar",
+        textinfo: 'percent',
+        orientation: 'h'
       }
 
-      var pieData = [trace2];
-      var pieLayout = {
+      var barData = [trace2];
+      var barLayout = {
         title: 'Belly Button Bacteria Pie Chart'
       };
 
-      Plotly.newPlot("pie", pieData, pieLayout);
+      Plotly.newPlot("bar", barData, barLayout);
 
     });
 }

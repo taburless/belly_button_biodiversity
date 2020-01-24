@@ -12,7 +12,9 @@ function init() {
     var selector = d3.select("#selDataset");
   
     // Use the list of sample names to populate the select options
-    d3.json("/names").then((sampleNames) => {
+    d3.json("data/samples.json").then((data) => {
+      var sampleNames = data.names;
+      //console.log(data);
       sampleNames.forEach((sample) => {
         selector
           .append("option")
@@ -43,7 +45,7 @@ function buildMetadata(sample) {
 }
 
 function buildCharts(sample) {
-    var url = d3.json("/samples/"+sampledata);
+    var url = d3.json("data/samples.json");
 
     url.then((sampleData) => {
       console.log(sampleData);
